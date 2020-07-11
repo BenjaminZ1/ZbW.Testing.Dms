@@ -1,4 +1,11 @@
-﻿namespace ZbW.Testing.Dms.Client.ViewModels
+﻿using System.Configuration;
+using System.IO;
+using System.Windows;
+using System.Xml.Serialization;
+using ZbW.Testing.Dms.Client.Model;
+using ZbW.Testing.Dms.Client.Services;
+
+namespace ZbW.Testing.Dms.Client.ViewModels
 {
     using System;
     using System.Collections.Generic;
@@ -10,7 +17,7 @@
 
     using ZbW.Testing.Dms.Client.Repositories;
 
-    internal class DocumentDetailViewModel : BindableBase
+    public class DocumentDetailViewModel : BindableBase
     {
         private readonly Action _navigateBack;
 
@@ -32,12 +39,15 @@
 
         private DateTime? _valutaDatum;
 
+        private DocumentService _documentService;
+
         public DocumentDetailViewModel(string benutzer, Action navigateBack)
         {
             _navigateBack = navigateBack;
             Benutzer = benutzer;
             Erfassungsdatum = DateTime.Now;
             TypItems = ComboBoxItems.Typ;
+            _documentService = new DocumentService();
 
             CmdDurchsuchen = new DelegateCommand(OnCmdDurchsuchen);
             CmdSpeichern = new DelegateCommand(OnCmdSpeichern);
@@ -166,7 +176,34 @@
         {
             // TODO: Add your Code here
 
-            _navigateBack();
+            //Pflichtfelder prüfen
+            if (!OnHaveAllRequiredFieldsData())
+            {
+                MessageBox.Show("Es müssen alle Pflichtfelder ausgefüllt werden!", "Pflichtfelder ausfüllen",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                
+            }
+            else if (OnHaveAllRequiredFieldsData())
+            {
+
+                //Metadata generieren
+                MetadataItem metadataItem = new MetadataItem(_benutzer, _bezeichnung, _erfassungsdatum,
+                    _selectedTypItem, _stichwoerter, _valutaDatum);
+
+                //XML und File speichern
+                _documentService.AddFileToDMS(metadataItem, _filePath, IsRemoveFileEnabled);
+
+                //Wenn _isRemoveFileEnabled == true zusätzlich altes File löschen
+
+                _navigateBack();
+            }
+        }
+
+        private bool OnHaveAllRequiredFieldsData()
+        {
+            return !String.IsNullOrEmpty(this.Bezeichnung) &&
+                   this.ValutaDatum.HasValue &&
+                   !String.IsNullOrEmpty(this.SelectedTypItem);
         }
     }
 }
