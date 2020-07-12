@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,14 +14,23 @@ namespace ZbW.Testing.Dms.Client.Services
 
     interface IXmlService
     {
-        string SeralizeMetadataItem(MetadataItem metadataItem);
+        string SerializeMetadataItem(MetadataItem metadataItem);
         MetadataItem DeserializeMetadataItem(string path);
         void SaveXml(string serializeXml, string path);
     }
 
     class XmlService : IXmlService
     {
-        public string SeralizeMetadataItem(MetadataItem metadataItem)
+        private readonly IFileSystem _fileSystem;
+
+        public XmlService(IFileSystem fileSystem)
+        {
+            _fileSystem = fileSystem;
+        }
+
+        public XmlService() : this (fileSystem: new FileSystem()){ }
+
+        public string SerializeMetadataItem(MetadataItem metadataItem)
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(MetadataItem));
             StringWriter stringWriter = new StringWriter();
@@ -34,20 +44,45 @@ namespace ZbW.Testing.Dms.Client.Services
 
         public MetadataItem DeserializeMetadataItem(string path)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(MetadataItem));
-            StreamReader reader = new StreamReader(path);
-            var metadataItem = (MetadataItem)serializer.Deserialize(reader);
-            reader.Close();
+            try
+            {
+                using (Stream fs = (Stream) _fileSystem.FileStream.Create(path, FileMode.Open))
+                {
+                    XmlSerializer serializer = new XmlSerializer(typeof(MetadataItem));
+                    StreamReader reader = new StreamReader(fs);
 
-            return metadataItem;
+                    var metadataItem = (MetadataItem) serializer.Deserialize(reader);
+                    reader.Close();
+
+                    return metadataItem;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
-        //Datei erstellen und Inhalt schreiben in FileServices auslagern
         public void SaveXml(string serializeXml, string path)
         {
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.LoadXml(serializeXml);
-            xmlDoc.Save(path);
+            try
+            {
+                using (Stream fs = (Stream) _fileSystem.FileStream.Create(path, FileMode.CreateNew))
+                {
+                    XmlDocument xmlDoc = new XmlDocument();
+                    xmlDoc.LoadXml(serializeXml);
+                    xmlDoc.Save(fs);
+                    fs.Flush();
+                    fs.Position = 0;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
+        
     }
 }

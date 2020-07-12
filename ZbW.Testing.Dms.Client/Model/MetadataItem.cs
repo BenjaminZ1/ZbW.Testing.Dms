@@ -34,5 +34,18 @@ namespace ZbW.Testing.Dms.Client.Model
         }
 
         public MetadataItem() { }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is MetadataItem))
+                return false;
+            MetadataItem other = (MetadataItem) obj;
+            if (this.SelectedTypItem == other.SelectedTypItem && this.Benutzer == other.Benutzer &&
+                this.Bezeichnung == other.Bezeichnung &&
+                this.Erfassungsdatum == other.Erfassungsdatum && this.Stichwoerter == other.Stichwoerter &&
+                this.ValutaDatum == other.ValutaDatum)
+                return true;
+            return false;
+        }
     }
 }

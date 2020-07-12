@@ -174,6 +174,47 @@ namespace ZbW.Testing.Dms.UnitTests
             Assert.That(result, Is.EquivalentTo(expectedResult));
         }
 
+        [Test]
+        public void GetAllXMLPaths_GetPaths_ReturnsCorrectResult()
+        {
+            //arrange
+
+            string savePath = TargetPath + @"\" + _currentYear;
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+            {
+                {savePath + @"\" + "test.xml", new MockFileData("Testing is...")},
+                {savePath+ @"\" + "test2.xml", new MockFileData("Testing is not...")}
+            });
+            var fileService = new FileService(fileSystem, savePath, TargetPath);
+            string[] expectedResult = { savePath + @"\" + "test.xml", savePath + @"\" + "test2.xml" };
+
+            //act
+            var result = fileService.GetAllXmlPaths(savePath);
+
+            //assert
+            Assert.That(result, Is.EquivalentTo(expectedResult));
+        }
+
+        [Test]
+        public void GetFileExtension_GetExtension_ReturnsCorrectResult()
+        {
+            //arrange
+
+            string savePath = TargetPath + @"\" + _currentYear;
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+            {
+                {savePath + @"\" + "test.xml", new MockFileData("Testing is...")},
+                {savePath+ @"\" + "test2.xml", new MockFileData("Testing is not...")}
+            });
+            var fileService = new FileService(fileSystem, savePath, TargetPath);
+            string expectedResult = ".xml";
+
+            //act
+            var result = fileService.GetFileExtension(savePath + @"\" + "test.xml");
+
+            //assert
+            Assert.That(result, Is.EqualTo(expectedResult));
+        }
     }
 
 }

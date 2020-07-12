@@ -185,16 +185,12 @@ namespace ZbW.Testing.Dms.Client.ViewModels
             }
             else if (OnHaveAllRequiredFieldsData())
             {
+                string guid = Guid.NewGuid().ToString();
 
-                //Metadata generieren
                 MetadataItem metadataItem = new MetadataItem(_benutzer, _bezeichnung, _erfassungsdatum,
                     _selectedTypItem, _stichwoerter, _valutaDatum);
 
-                //XML und File speichern
-                _documentService.AddFileToDMS(metadataItem, _filePath, IsRemoveFileEnabled);
-
-                //Wenn _isRemoveFileEnabled == true zusätzlich altes File löschen
-
+                _documentService.AddFileToDMS(metadataItem, _filePath, IsRemoveFileEnabled, guid);
                 _navigateBack();
             }
         }

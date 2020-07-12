@@ -43,9 +43,8 @@ namespace ZbW.Testing.Dms.Client.Services
             _xmlService = xmlService;
         }
 
-        public void AddFileToDMS(MetadataItem metadataItem, string filePath, bool isRemoveFileEnabled)
+        public void AddFileToDMS(MetadataItem metadataItem, string filePath, bool isRemoveFileEnabled, string guid)
         {
-            string guid = Guid.NewGuid().ToString();
             string newFileName = GenerateNewFileName(filePath, guid);
             string newXmlName = GenerateNewXMLName(guid);
             string newXmlPath = _savePath + @"\" + newXmlName;
@@ -54,13 +53,13 @@ namespace ZbW.Testing.Dms.Client.Services
             {
                 _fileService.MoveFile(filePath, newFileName);
                 metadataItem.FilePath = _savePath + @"\" + newFileName;
-                _xmlService.SaveXml(_xmlService.SeralizeMetadataItem(metadataItem), newXmlPath);
+                _xmlService.SaveXml(_xmlService.SerializeMetadataItem(metadataItem), newXmlPath);
             }
             else
             {
                 _fileService.CopyFile(filePath, newFileName);
                 metadataItem.FilePath = _savePath + @"\" + newFileName;
-                _xmlService.SaveXml(_xmlService.SeralizeMetadataItem(metadataItem), newXmlPath);
+                _xmlService.SaveXml(_xmlService.SerializeMetadataItem(metadataItem), newXmlPath);
             }
         }
 

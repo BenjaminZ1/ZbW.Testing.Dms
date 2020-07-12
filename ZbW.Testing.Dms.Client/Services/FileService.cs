@@ -30,6 +30,7 @@ namespace ZbW.Testing.Dms.Client.Services
             _targetPath = targetPath;
             if (!CheckFolderStructure())
                 CreateFolderStructure();
+
         }
 
         public FileService (string savePath, string targetPath) : this (fileSystem: new FileSystem(), savePath, targetPath) { }
@@ -93,6 +94,5 @@ namespace ZbW.Testing.Dms.Client.Services
 
             return xmlPaths;
         }
-
     }
 }
