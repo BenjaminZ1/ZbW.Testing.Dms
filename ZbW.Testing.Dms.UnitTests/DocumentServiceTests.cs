@@ -25,7 +25,7 @@ namespace ZbW.Testing.Dms.UnitTests
 
             var erfassungsDatum = new DateTime(2020, 01, 01);
             DateTime? valutaDatum = new DateTime(2020, 02, 02);
-            var metadataItem = new MetadataItem("TestUser", "TestFile", erfassungsDatum, "Vertäge", "Ich bin ein Test", valutaDatum);
+            var metadataItem = new MetadataItem("TestUser", "TestFile", erfassungsDatum, "Verträge", "Ich bin ein Test", valutaDatum);
 
             string guid = Guid.NewGuid().ToString();
 
@@ -49,7 +49,7 @@ namespace ZbW.Testing.Dms.UnitTests
 
             var erfassungsDatum = new DateTime(2020, 01, 01);
             DateTime? valutaDatum = new DateTime(2020, 02, 02);
-            var metadataItem = new MetadataItem("TestUser", "TestFile", erfassungsDatum, "Vertäge", "Ich bin ein Test", valutaDatum);
+            var metadataItem = new MetadataItem("TestUser", "TestFile", erfassungsDatum, "Verträge", "Ich bin ein Test", valutaDatum);
 
             string guid = Guid.NewGuid().ToString();
             string newFileName = guid + "_Content" + ".xml";
@@ -73,7 +73,7 @@ namespace ZbW.Testing.Dms.UnitTests
 
             var erfassungsDatum = new DateTime(2020, 01, 01);
             DateTime? valutaDatum = new DateTime(2020, 02, 02);
-            var metadataItem = new MetadataItem("TestUser", "TestFile", erfassungsDatum, "Vertäge", "Ich bin ein Test", valutaDatum);
+            var metadataItem = new MetadataItem("TestUser", "TestFile", erfassungsDatum, "Verträge", "Ich bin ein Test", valutaDatum);
 
             string guid = Guid.NewGuid().ToString();
             string newFileName = guid + "_Content" + ".xml";
@@ -96,7 +96,7 @@ namespace ZbW.Testing.Dms.UnitTests
 
             var erfassungsDatum = new DateTime(2020, 01, 01);
             DateTime? valutaDatum = new DateTime(2020, 02, 02);
-            var metadataItem = new MetadataItem("TestUser", "TestFile", erfassungsDatum, "Vertäge", "Ich bin ein Test", valutaDatum);
+            var metadataItem = new MetadataItem("TestUser", "TestFile", erfassungsDatum, "Verträge", "Ich bin ein Test", valutaDatum);
             
             string guid = Guid.NewGuid().ToString();
             string newFileName = guid + "_Content" + ".xml";
@@ -109,6 +109,38 @@ namespace ZbW.Testing.Dms.UnitTests
 
             //act
             var result = documentService.GetAllMetadataItems();
+
+            //assert
+            Assert.That(result, Is.EqualTo(expectedResult));
+        }
+
+        [Test]
+        public void FilterAllMetadataItems_Filter_ReturnsCorrectResult()
+        {
+            //arrange
+            var fileServiceStub = A.Fake<IFileService>();
+            var xmlServiceStub = A.Fake<IXmlService>();
+            var documentService = new DocumentService(fileServiceStub, xmlServiceStub);
+
+            var erfassungsDatum = new DateTime(2020, 01, 01);
+            DateTime? valutaDatum = new DateTime(2020, 02, 02);
+            var metadataItem = new MetadataItem("TestUser", "TestFile", erfassungsDatum, "Verträge", "Ich bin ein Test", valutaDatum);
+
+            string guid = Guid.NewGuid().ToString();
+            string newFileName = guid + "_Content" + ".xml";
+            string suchbegriff = "TestFile";
+            string type = "Verträge";
+            List<MetadataItem> expectedResult = new List<MetadataItem> { metadataItem };
+
+            A.CallTo(() => fileServiceStub.GetFileExtension(DummyFilePath)).Returns(".xml");
+            A.CallTo(() => fileServiceStub.GetAllFolderPaths()).Returns(new string[] { DummyFolderPath });
+            A.CallTo(() => fileServiceStub.GetAllXmlPaths(DummyFolderPath)).Returns(new List<string>(new string[] { DummyFilePath }));
+            A.CallTo(() => xmlServiceStub.DeserializeMetadataItem(DummyFilePath)).Returns(metadataItem);
+
+            //act
+            documentService.GetAllMetadataItems();
+            var result = documentService.FilterAllMetadataItems(suchbegriff, type);
+
 
             //assert
             Assert.That(result, Is.EqualTo(expectedResult));
